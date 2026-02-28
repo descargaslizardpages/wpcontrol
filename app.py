@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-# 1. Configuración de página (OBLIGATORIO AL PRINCIPIO)
+# 1. Configuración de página (Debe ser la primera línea)
 st.set_page_config(page_title="LizardPages Hub", page_icon="🦎", layout="wide")
 
 # 2. Seguridad (Clave: 1234)
@@ -36,9 +36,9 @@ st.markdown("""
     """, unsafe_content_html=True)
 
 st.title("🦎 LizardPages Command Center")
-st.write("Bienvenido de nuevo, Gerling.")
+st.write(f"Bienvenido de nuevo, Gerling.")
 
-# 4. Base de datos de sitios (Aquí van tus clientes de Hosting Unlimited Pro)
+# 4. Base de datos de tus sitios
 mis_sitios = [
     {
         "nombre": "LizardPages Principal", 
@@ -50,10 +50,10 @@ mis_sitios = [
 
 st.subheader("Gestión de Sitios")
 
-# 5. Listado de sitios (Corregido el error de columnas)
+# 5. Listado de sitios (Corregido el error de st.columns)
 for sitio in mis_sitios:
     with st.container():
-        # Definimos 3 columnas con anchos proporcionales [Nombre, Salud, Enlace]
+        # Definimos 3 columnas con anchos específicos
         col1, col2, col3 = st.columns()
         
         with col1:
@@ -61,7 +61,7 @@ for sitio in mis_sitios:
             st.caption(sitio['url'])
             
         with col2:
-            if st.button(f"🔍 Salud", key=f"health_{sitio['nombre']}"):
+            if st.button(f"🔍 Salud", key=f"h_{sitio['nombre']}"):
                 try:
                     res = requests.get(f"{sitio['url']}/wp-json/wp/v2/posts", 
                                      auth=(sitio['user'], sitio['pass']), timeout=10)
@@ -79,7 +79,7 @@ for sitio in mis_sitios:
 
 # 6. Barra lateral
 with st.sidebar:
-    st.info("Panel v1.0 - LizardPages Hub")
+    st.info("Panel v1.0 - LizardPages")
     if st.button("Cerrar Sesión"):
         st.session_state["authenticated"] = False
         st.rerun()
