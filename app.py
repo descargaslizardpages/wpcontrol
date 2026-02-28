@@ -1,10 +1,10 @@
 import streamlit as st
 import requests
 
-# 1. Configuración de página (Siempre primero)
-st.set_page_config(page_title="LizardPages Hub", page_icon="🦎")
+# 1. Configuración obligatoria
+st.set_page_config(page_title="LizardPages Hub", page_icon="🦎", layout="wide")
 
-# 2. Sistema de Seguridad Simple
+# 2. Seguridad (Clave: 1234)
 if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
 
@@ -19,11 +19,11 @@ if not st.session_state["authenticated"]:
             st.error("Clave incorrecta")
     st.stop()
 
-# 3. Contenido de la App (Solo se ve si estás autenticado)
+# 3. Encabezado con tu marca
 st.title("🦎 LizardPages Command Center")
 st.write(f"Bienvenido de nuevo, Gerling.")
 
-# Base de datos de tus sitios
+# 4. Base de datos de tus sitios (Aquí agregas tus clientes)
 mis_sitios = [
     {
         "nombre": "LizardPages Principal", 
@@ -35,8 +35,10 @@ mis_sitios = [
 
 st.subheader("Gestión de Sitios")
 
+# 5. Listado de sitios corregido
 for sitio in mis_sitios:
     with st.container():
+        # Corregido: Ahora indicamos que queremos 3 columnas
         col1, col2, col3 = st.columns()
         
         with col1:
@@ -44,24 +46,26 @@ for sitio in mis_sitios:
             st.caption(sitio['url'])
             
         with col2:
-            if st.button(f"Verificar", key=f"btn_{sitio['nombre']}"):
+            if st.button(f"Verificar Salud", key=f"btn_{sitio['nombre']}"):
                 try:
                     res = requests.get(f"{sitio['url']}/wp-json/wp/v2/posts", 
                                      auth=(sitio['user'], sitio['pass']), timeout=10)
                     if res.status_code == 200:
-                        st.success("Online")
+                        st.success("Conectado")
                     else:
                         st.warning(f"Error {res.status_code}")
                 except:
-                    st.error("Caído")
+                    st.error("No responde")
                     
         with col3:
-            st.link_button("Ir al Admin", f"{sitio['url']}/wp-admin")
+            # Botón estilizado para ir al admin
+            st.link_button("Ir al Admin 🚀", f"{sitio['url']}/wp-admin")
         
         st.divider()
 
-# Barra lateral simple
+# 6. Barra lateral
 with st.sidebar:
+    st.info("Panel de Control v1.0")
     if st.button("Cerrar Sesión"):
         st.session_state["authenticated"] = False
         st.rerun()
