@@ -1,7 +1,10 @@
 import streamlit as st
 import requests
 
-# 1. SEGURIDAD
+# 1. ESTO DEBE IR PRIMERO SIEMPRE
+st.set_page_config(page_title="LizardPages Hub", page_icon="🦎", layout="wide")
+
+# 2. SISTEMA DE SEGURIDAD
 def check_password():
     if "password_correct" not in st.session_state:
         st.session_state["password_correct"] = False
@@ -10,7 +13,7 @@ def check_password():
         st.title("🦎 Acceso LizardPages")
         pwd = st.text_input("Introduce la clave maestra:", type="password")
         if st.button("Entrar"):
-            if pwd == "1234": # Tu contraseña actual
+            if pwd == "1234": # Tu contraseña
                 st.session_state["password_correct"] = True
                 st.rerun()
             else:
@@ -19,25 +22,24 @@ def check_password():
     return True
 
 if check_password():
-    # 2. CONFIGURACIÓN VISUAL (Tu marca #00a0fe)
-    st.set_page_config(page_title="LizardPages Hub", page_icon="🦎")
+    # 3. DISEÑO CON TU MARCA (#00a0fe y Exo 2)
     st.markdown("""
         <style>
-        .stButton>button { background-color: #00a0fe; color: white; border-radius: 10px; }
-        h1 { color: #00a0fe; font-family: 'Exo 2'; }
+        @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700&display=swap');
+        html, body, [class*="css"] { font-family: 'Exo 2', sans-serif; }
+        .stButton>button { background-color: #00a0fe; color: white; border-radius: 10px; border: none; }
+        h1 { color: #00a0fe; }
         </style>
         """, unsafe_content_html=True)
 
     st.title("🦎 LizardPages Command Center")
 
-    # 3. BASE DE DATOS DE CLIENTES
-    # Aquí puedes seguir agregando más diccionarios para cada cliente
+    # 4. TUS SITIOS
     mis_sitios = [
         {"nombre": "LizardPages", "url": "https://lizardpages.com", "user": "LP", "pass": "ZYk2 2z3H vSL2 A0D8 Hr3u ibG6"},
-        # {"nombre": "Cliente X", "url": "https://clientex.com", "user": "admin", "pass": "xxxx xxxx xxxx"}
     ]
 
-    # 4. ACCIÓN MASIVA: PUBLICADOR
+    # 5. PUBLICADOR MASIVO (Sidebar)
     with st.sidebar:
         st.header("📢 Anuncio Global")
         titulo_aviso = st.text_input("Título del aviso")
@@ -49,18 +51,22 @@ if check_password():
                 if r.status_code == 201:
                     st.toast(f"Publicado en {sitio['nombre']}")
 
-    # 5. LISTADO DE SITIOS
+    # 6. LISTADO VISUAL
     st.subheader("Estado de la Red")
     for sitio in mis_sitios:
-        col1, col2, col4 = st.columns()
-        with col1:
-            st.write(f"**{sitio['nombre']}**")
-            st.caption(sitio['url'])
-        with col2:
-            if st.button("Check Plugins", key=sitio['nombre']):
-                res = requests.get(f"{sitio['url']}/wp-json/wp/v2/plugins", auth=(sitio['user'], sitio['pass']))
-                if res.status_code == 200:
-                    st.info(f"{len(res.json())} Plugins")
-        with col4:
-            st.link_button("Ir al Admin", f"{sitio['url']}/wp-admin")
-        st.divider()
+        with st.container():
+            col1, col2, col3 = st.columns()
+            with col1:
+                st.write(f"**{sitio['nombre']}**")
+                st.caption(sitio['url'])
+            with col2:
+                if st.button(f"Plugins", key=f"btn_{sitio['nombre']}"):
+                    try:
+                        res = requests.get(f"{sitio['url']}/wp-json/wp/v2/plugins", auth=(sitio['user'], sitio['pass']))
+                        if res.status_code == 200:
+                            st.info(f"{len(res.json())} Plugins")
+                    except:
+                        st.error("Error")
+            with col3:
+                st.link_button("Abrir Admin", f"{sitio['url']}/wp-admin")
+            st.divider()
