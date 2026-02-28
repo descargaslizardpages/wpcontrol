@@ -1,43 +1,29 @@
 import streamlit as st
 import requests
 
-# 1. CONFIGURACIÓN INICIAL (DEBE SER LA PRIMERA LÍNEA DE CÓDIGO)
-st.set_page_config(page_title="LizardPages Hub", page_icon="🦎", layout="wide")
+# 1. Configuración de página (Siempre primero)
+st.set_page_config(page_title="LizardPages Hub", page_icon="🦎")
 
-# 2. SISTEMA DE SEGURIDAD
-if "password_correct" not in st.session_state:
-    st.session_state["password_correct"] = False
+# 2. Sistema de Seguridad Simple
+if "authenticated" not in st.session_state:
+    st.session_state["authenticated"] = False
 
-if not st.session_state["password_correct"]:
+if not st.session_state["authenticated"]:
     st.title("🦎 Acceso LizardPages")
-    pwd = st.text_input("Introduce la clave maestra:", type="password")
+    clave = st.text_input("Introduce la clave maestra:", type="password")
     if st.button("Entrar"):
-        if pwd == "1234":
-            st.session_state["password_correct"] = True
+        if clave == "1234":
+            st.session_state["authenticated"] = True
             st.rerun()
         else:
             st.error("Clave incorrecta")
-    st.stop() # Detiene la ejecución aquí si no hay login
+    st.stop()
 
-# 3. DISEÑO Y MARCA (Solo se ejecuta si el login es correcto)
-st.markdown("""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700&display=swap');
-    html, body, [class*="css"] { font-family: 'Exo 2', sans-serif; }
-    .stButton>button { 
-        background-color: #00a0fe; 
-        color: white; 
-        border-radius: 10px; 
-        border: none;
-        font-weight: bold;
-    }
-    h1 { color: #00a0fe; }
-    </style>
-    """, unsafe_content_html=True)
-
+# 3. Contenido de la App (Solo se ve si estás autenticado)
 st.title("🦎 LizardPages Command Center")
+st.write(f"Bienvenido de nuevo, Gerling.")
 
-# 4. BASE DE DATOS DE SITIOS
+# Base de datos de tus sitios
 mis_sitios = [
     {
         "nombre": "LizardPages Principal", 
@@ -47,7 +33,6 @@ mis_sitios = [
     },
 ]
 
-# 5. PANEL VISUAL
 st.subheader("Gestión de Sitios")
 
 for sitio in mis_sitios:
@@ -59,27 +44,24 @@ for sitio in mis_sitios:
             st.caption(sitio['url'])
             
         with col2:
-            if st.button(f"🔍 Verificar Salud", key=f"h_{sitio['nombre']}"):
+            if st.button(f"Verificar", key=f"btn_{sitio['nombre']}"):
                 try:
-                    # Probamos conexión con la API de WordPress
                     res = requests.get(f"{sitio['url']}/wp-json/wp/v2/posts", 
                                      auth=(sitio['user'], sitio['pass']), timeout=10)
                     if res.status_code == 200:
-                        st.success("✅ Online")
+                        st.success("Online")
                     else:
-                        st.warning(f"⚠️ Error {res.status_code}")
+                        st.warning(f"Error {res.status_code}")
                 except:
-                    st.error("❌ Caído")
+                    st.error("Caído")
                     
         with col3:
-            st.link_button("🚀 Abrir Admin", f"{sitio['url']}/wp-admin")
+            st.link_button("Ir al Admin", f"{sitio['url']}/wp-admin")
         
         st.divider()
 
-# 6. BARRA LATERAL (Sidebar)
+# Barra lateral simple
 with st.sidebar:
-    st.header("Herramientas de Red")
-    st.write("Bienvenido, Gerling")
     if st.button("Cerrar Sesión"):
-        st.session_state["password_correct"] = False
+        st.session_state["authenticated"] = False
         st.rerun()
