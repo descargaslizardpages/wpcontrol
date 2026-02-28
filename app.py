@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-# 1. Configuración de página (Debe ser la primera línea)
+# 1. Configuración de página (OBLIGATORIO AL PRINCIPIO)
 st.set_page_config(page_title="LizardPages Hub", page_icon="🦎", layout="wide")
 
 # 2. Seguridad (Clave: 1234)
@@ -36,9 +36,9 @@ st.markdown("""
     """, unsafe_content_html=True)
 
 st.title("🦎 LizardPages Command Center")
-st.write(f"Bienvenido de nuevo, Gerling.")
+st.write("Bienvenido de nuevo, Gerling.")
 
-# 4. Base de datos de tus sitios
+# 4. Base de datos de sitios (Tus clientes de Hosting Unlimited Pro)
 mis_sitios = [
     {
         "nombre": "LizardPages Principal", 
@@ -50,10 +50,10 @@ mis_sitios = [
 
 st.subheader("Gestión de Sitios")
 
-# 5. Listado de sitios (Corregido el error de st.columns)
+# 5. Listado de sitios (Corregido el error de columnas)
 for sitio in mis_sitios:
     with st.container():
-        # Definimos 3 columnas con anchos específicos
+        # Definimos 3 columnas: Nombre, Botón Salud, Botón Admin
         col1, col2, col3 = st.columns()
         
         with col1:
@@ -77,9 +77,9 @@ for sitio in mis_sitios:
         
         st.divider()
 
-# 6. Barra lateral
+# 6. Barra lateral con tu marca
 with st.sidebar:
-    st.info("Panel v1.0 - LizardPages")
+    st.info("Panel de Control v1.0")
     if st.button("Cerrar Sesión"):
         st.session_state["authenticated"] = False
         st.rerun()
