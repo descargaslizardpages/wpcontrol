@@ -1,50 +1,59 @@
 import streamlit as st
 import requests
 
-# Configuración visual con tu marca LizardPages
-st.set_page_config(page_title="LizardPages Hub", page_icon="🦎", layout="wide")
+# 1. CONFIGURACIÓN DE SEGURIDAD
+def check_password():
+    """Retorna True si el usuario introdujo la contraseña correcta."""
+    def password_entered():
+        if st.session_state["password"] == "TU_CONTRASEÑA_AQUÍ": # <--- CAMBIA ESTO
+            st.session_state["password_correct"] = True
+            del st.session_state["password"]
+        else:
+            st.session_state["password_correct"] = False
 
-# Estilo personalizado (Color #00a0fe)
-st.markdown(f"""
-    <style>
-    .stApp {{ background-color: #0e1117; color: white; }}
-    .stButton>button {{ background-color: #00a0fe; color: white; border-radius: 8px; }}
-    .stHeader {{ font-family: 'Exo 2', sans-serif; }}
-    </style>
-    """, unsafe_content_html=True)
+    if "password_correct" not in st.session_state:
+        st.text_input("Contraseña de Acceso", type="password", on_change=password_entered, key="password")
+        st.write("🔒 Área restringida para administración de sitios.")
+        return False
+    elif not st.session_state["password_correct"]:
+        st.text_input("Contraseña de Acceso", type="password", on_change=password_entered, key="password")
+        st.error("😕 Contraseña incorrecta")
+        return False
+    else:
+        return True
 
-st.title("🦎 LizardPages Multi-Site Manager")
-st.write("Gestiona tus sitios y los de tus clientes desde un solo lugar.")
+# 2. DISEÑO Y MARCA
+if check_password():
+    st.set_page_config(page_title="LizardPages Hub", page_icon="🦎", layout="wide")
+    
+    # Aplicamos tu color de marca #00a0fe y tipografía Exo 2
+    st.markdown("""
+        <style>
+        @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700&display=swap');
+        html, body, [class*="css"] { font-family: 'Exo 2', sans-serif; }
+        .stButton>button { background-color: #00a0fe; color: white; border-radius: 20px; width: 100%; }
+        </style>
+        """, unsafe_content_html=True)
 
-# Tu base de datos de sitios
-mis_sitios = [
-    {"nombre": "LizardPages", "url": "https://lizardpages.com", "user": "LP", "pass": "ZYk2 2z3H vSL2 A0D8 Hr3u ibG6"},
-    # Añade aquí más clientes siguiendo el mismo formato
-]
+    st.title("🦎 LizardPages Multi-Site Manager")
+    
+    # Base de datos de tus sitios (Añade aquí los que necesites)
+    mis_sitios = [
+        {"nombre": "LizardPages", "url": "https://lizardpages.com", "user": "LP", "pass": "ZYk2 2z3H vSL2 A0D8 Hr3u ibG6"},
+    ]
 
-# Interfaz de Gestión
-for sitio in mis_sitios:
-    with st.expander(f"🌐 {sitio['nombre']} - {sitio['url']}"):
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            if st.button(f"Revisar Plugins", key=f"plugins_{sitio['nombre']}"):
-                try:
+    # Panel de control
+    for sitio in mis_sitios:
+        with st.container():
+            col1, col2, col3 = st.columns()
+            with col1:
+                st.subheader(sitio['nombre'])
+                st.write(sitio['url'])
+            with col2:
+                if st.button(f"Verificar Salud", key=f"check_{sitio['nombre']}"):
                     res = requests.get(f"{sitio['url']}/wp-json/wp/v2/plugins", auth=(sitio['user'], sitio['pass']))
                     if res.status_code == 200:
-                        plugins = res.json()
-                        updates = [p for p in plugins if p.get('update')]
-                        st.info(f"Total: {len(plugins)} | ⚠️ Pendientes: {len(updates)}")
-                    else:
-                        st.error("Error de conexión")
-                except:
-                    st.error("Sitio no alcanzable")
-
-        with col2:
-            if st.button(f"Ver Entradas", key=f"posts_{sitio['nombre']}"):
-                res = requests.get(f"{sitio['url']}/wp-json/wp/v2/posts", auth=(sitio['user'], sitio['pass']))
-                if res.status_code == 200:
-                    st.success(f"Entradas publicadas: {len(res.json())}")
-
-        with col3:
-            st.link_button("Abrir WP-Admin", f"{sitio['url']}/wp-admin")
+                        st.success(f"Online - {len(res.json())} Plugins")
+            with col3:
+                st.link_button("Abrir Admin", f"{sitio['url']}/wp-admin")
+            st.divider()
