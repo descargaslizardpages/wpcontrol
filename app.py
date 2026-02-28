@@ -5,7 +5,7 @@ import requests
 def check_password():
     """Retorna True si el usuario introdujo la contraseña correcta."""
     def password_entered():
-        if st.session_state["password"] == "TU_CONTRASEÑA_AQUÍ": # <--- CAMBIA ESTO
+        if st.session_state["password"] == "1234": # <--- CAMBIA ESTO
             st.session_state["password_correct"] = True
             del st.session_state["password"]
         else:
