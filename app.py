@@ -1,43 +1,70 @@
 import streamlit as st
 import requests
-import hashlib
 
-# 1. Configuración
-st.set_page_config(page_title="LizardPages Hub - AutoLogin", page_icon="🦎")
+# 1. Configuración de página (OBLIGATORIO AL PRINCIPIO)
+st.set_page_config(page_title="LizardPages Hub", page_icon="🦎", layout="wide")
 
-if "sitios" not in st.session_state:
-    st.session_state["sitios"] = []
+# 2. Seguridad de Acceso
+if "authenticated" not in st.session_state:
+    st.session_state["authenticated"] = False
 
-st.title("🦎 LizardPages: Acceso Rápido")
-st.write("Agrega tus sitios para entrar sin contraseña.")
-
-# 2. Formulario para agregar sitios
-with st.expander("➕ Agregar nuevo sitio"):
-    with st.form("nuevo_sitio"):
-        nombre = st.text_input("Nombre del sitio (ej. Mi Blog)")
-        url = st.text_input("URL (https://...)")
-        user = st.text_input("Usuario admin")
-        token = st.text_input("Token de Seguridad (Inventa una palabra secreta)", type="password")
-        if st.form_submit_button("Guardar Sitio"):
-            st.session_state["sitios"].append({"nombre": nombre, "url": url.rstrip('/'), "user": user, "token": token})
+if not st.session_state["authenticated"]:
+    st.title("🦎 Acceso LizardPages")
+    clave = st.text_input("Introduce la clave maestra:", type="password")
+    if st.button("Entrar"):
+        if clave == "1234":
+            st.session_state["authenticated"] = True
             st.rerun()
+        else:
+            st.error("Clave incorrecta")
+    st.stop()
 
-# 3. Listado de Sitios con Auto-Login
-st.subheader("Mis WordPress")
+# 3. Panel de Control (Solo se ve si estás logueado)
+st.title("🦎 LizardPages Command Center")
+st.write(f"Bienvenido de nuevo, Gerling.")
 
-for i, sitio in enumerate(st.session_state["sitios"]):
-    col1, col2, col3 = st.columns()
-    
-    with col1:
-        st.write(f"**{sitio['nombre']}**")
-    
-    with col2:
-        # Generamos el enlace mágico
-        # Enviamos el usuario y el token como validación
-        magic_url = f"{sitio['url']}/?lizard_login={sitio['user']}&key={sitio['token']}"
-        st.link_button("🚀 Entrar sin Clave", magic_url)
-    
-    with col3:
-        if st.button("Eliminar", key=f"del_{i}"):
-            st.session_state["sitios"].pop(i)
-            st.rerun()
+# Lista de tus sitios (Aquí puedes agregar más siguiendo el formato)
+mis_sitios = [
+    {
+        "nombre": "LizardPages Principal", 
+        "url": "https://lizardpages.com", 
+        "user": "LP", 
+        "pass": "ZYk2 2z3H vSL2 A0D8 Hr3u ibG6"
+    },
+]
+
+st.subheader("Gestión de Mis Sitios")
+
+for sitio in mis_sitios:
+    with st.container():
+        # CORRECCIÓN: Ahora indicamos que queremos 3 columnas con anchos proporcionales
+        col1, col2, col3 = st.columns()
+        
+        with col1:
+            st.write(f"**{sitio['nombre']}**")
+            st.caption(sitio['url'])
+            
+        with col2:
+            if st.button(f"🔌 Verificar Salud", key=f"v_{sitio['nombre']}"):
+                try:
+                    res = requests.get(f"{sitio['url']}/wp-json/wp/v2/posts", 
+                                     auth=(sitio['user'], sitio['pass']), timeout=10)
+                    if res.status_code == 200:
+                        st.success("Online")
+                    else:
+                        st.warning(f"Error {res.status_code}")
+                except:
+                    st.error("No responde")
+                    
+        with col3:
+            # Enlace directo al Admin de WordPress
+            st.link_button("🚀 Abrir Admin", f"{sitio['url']}/wp-admin")
+        
+        st.divider()
+
+# Barra lateral
+with st.sidebar:
+    st.info("Panel v1.0 - Hosting Unlimited Pro")
+    if st.button("Cerrar Sesión"):
+        st.session_state["authenticated"] = False
+        st.rerun()
