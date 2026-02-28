@@ -1,85 +1,46 @@
 import streamlit as st
 import requests
 
-# 1. Configuración de página (OBLIGATORIO AL PRINCIPIO)
-st.set_page_config(page_title="LizardPages Hub", page_icon="🦎", layout="wide")
+# 1. Configuración básica
+st.set_page_config(page_title="LizardPages Hub")
 
-# 2. Seguridad (Clave: 1234)
-if "authenticated" not in st.session_state:
-    st.session_state["authenticated"] = False
+# 2. Seguridad ultra-simple
+if "login" not in st.session_state:
+    st.session_state["login"] = False
 
-if not st.session_state["authenticated"]:
-    st.title("🦎 Acceso LizardPages")
-    clave = st.text_input("Introduce la clave maestra:", type="password")
+if not st.session_state["login"]:
+    st.title("🔒 Acceso")
+    clave = st.text_input("Contraseña:", type="password")
     if st.button("Entrar"):
         if clave == "1234":
-            st.session_state["authenticated"] = True
+            st.session_state["login"] = True
             st.rerun()
         else:
-            st.error("Clave incorrecta")
+            st.error("Incorrecta")
     st.stop()
 
-# 3. Estilo Visual LizardPages (#00a0fe y Exo 2)
-st.markdown("""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700&display=swap');
-    html, body, [class*="css"] { font-family: 'Exo 2', sans-serif; }
-    .stButton>button { 
-        background-color: #00a0fe; 
-        color: white; 
-        border-radius: 10px; 
-        border: none;
-        width: 100%;
-    }
-    h1, h2, h3 { color: #00a0fe; font-family: 'Exo 2', sans-serif; }
-    </style>
-    """, unsafe_content_html=True)
+# 3. El Panel (Sin columnas, una cosa debajo de otra para evitar errores)
+st.title("🦎 LizardPages Hub")
 
-st.title("🦎 LizardPages Command Center")
-st.write("Bienvenido de nuevo, Gerling.")
+# Datos de tu sitio
+nombre = "LizardPages Principal"
+url = "https://lizardpages.com"
+usuario = "LP"
+pas_wp = "ZYk2 2z3H vSL2 A0D8 Hr3u ibG6"
 
-# 4. Base de datos de sitios (Tus clientes de Hosting Unlimited Pro)
-mis_sitios = [
-    {
-        "nombre": "LizardPages Principal", 
-        "url": "https://lizardpages.com", 
-        "user": "LP", 
-        "pass": "ZYk2 2z3H vSL2 A0D8 Hr3u ibG6"
-    },
-]
+st.write(f"### Gestionando: {nombre}")
+st.write(f"URL: {url}")
 
-st.subheader("Gestión de Sitios")
+if st.button("🔌 Probar Conexión"):
+    try:
+        # Petición simple a la API
+        r = requests.get(f"{url}/wp-json/wp/v2/posts", auth=(usuario, pas_wp), timeout=10)
+        if r.status_code == 200:
+            st.success("✅ ¡CONECTADO! La API responde correctamente.")
+        else:
+            st.warning(f"⚠️ Error del servidor: {r.status_code}")
+    except Exception as e:
+        st.error(f"❌ Error de red: {e}")
 
-# 5. Listado de sitios (Corregido el error de columnas)
-for sitio in mis_sitios:
-    with st.container():
-        # Definimos 3 columnas: Nombre, Botón Salud, Botón Admin
-        col1, col2, col3 = st.columns()
-        
-        with col1:
-            st.write(f"**{sitio['nombre']}**")
-            st.caption(sitio['url'])
-            
-        with col2:
-            if st.button(f"🔍 Salud", key=f"h_{sitio['nombre']}"):
-                try:
-                    res = requests.get(f"{sitio['url']}/wp-json/wp/v2/posts", 
-                                     auth=(sitio['user'], sitio['pass']), timeout=10)
-                    if res.status_code == 200:
-                        st.success("Online")
-                    else:
-                        st.warning(f"Error {res.status_code}")
-                except:
-                    st.error("Caído")
-                    
-        with col3:
-            st.link_button("Ir al Admin 🚀", f"{sitio['url']}/wp-admin")
-        
-        st.divider()
-
-# 6. Barra lateral con tu marca
-with st.sidebar:
-    st.info("Panel de Control v1.0")
-    if st.button("Cerrar Sesión"):
-        st.session_state["authenticated"] = False
-        st.rerun()
+st.divider()
+st.link_button("🚀 Ir al Escritorio de WordPress", f"{url}/wp-admin")
