@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-# 1. Configuración obligatoria (Debe ser la primera línea)
+# 1. Configuración de página (OBLIGATORIO AL PRINCIPIO)
 st.set_page_config(page_title="LizardPages Hub", page_icon="🦎", layout="wide")
 
 # 2. Seguridad (Clave: 1234)
@@ -19,7 +19,7 @@ if not st.session_state["authenticated"]:
             st.error("Clave incorrecta")
     st.stop()
 
-# 3. Diseño y Estilo LizardPages (#00a0fe y Exo 2)
+# 3. Estilo Visual LizardPages (#00a0fe y Exo 2)
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700&display=swap');
@@ -36,9 +36,9 @@ st.markdown("""
     """, unsafe_content_html=True)
 
 st.title("🦎 LizardPages Command Center")
-st.write(f"Bienvenido de nuevo, Gerling.")
+st.write("Bienvenido de nuevo, Gerling.")
 
-# 4. Base de datos de sitios (Añade aquí tus clientes de Hosting Unlimited Pro)
+# 4. Base de datos de sitios (Aquí van tus clientes de Hosting Unlimited Pro)
 mis_sitios = [
     {
         "nombre": "LizardPages Principal", 
@@ -53,7 +53,7 @@ st.subheader("Gestión de Sitios")
 # 5. Listado de sitios (Corregido el error de columnas)
 for sitio in mis_sitios:
     with st.container():
-        # Aquí definimos el ancho de las 3 columnas [Nombre, Salud, Enlace]
+        # Definimos 3 columnas con anchos proporcionales [Nombre, Salud, Enlace]
         col1, col2, col3 = st.columns()
         
         with col1:
@@ -61,7 +61,7 @@ for sitio in mis_sitios:
             st.caption(sitio['url'])
             
         with col2:
-            if st.button(f"🔍 Salud", key=f"check_{sitio['nombre']}"):
+            if st.button(f"🔍 Salud", key=f"health_{sitio['nombre']}"):
                 try:
                     res = requests.get(f"{sitio['url']}/wp-json/wp/v2/posts", 
                                      auth=(sitio['user'], sitio['pass']), timeout=10)
@@ -69,7 +69,7 @@ for sitio in mis_sitios:
                         st.success("Online")
                     else:
                         st.warning(f"Error {res.status_code}")
-                except Exception:
+                except:
                     st.error("Caído")
                     
         with col3:
@@ -79,8 +79,7 @@ for sitio in mis_sitios:
 
 # 6. Barra lateral
 with st.sidebar:
-    st.image("https://lizardpages.com/wp-content/uploads/2024/01/logo-lizardpages.png", width=120)
-    st.info("Panel v1.0 - Hosting Unlimited Pro")
+    st.info("Panel v1.0 - LizardPages Hub")
     if st.button("Cerrar Sesión"):
         st.session_state["authenticated"] = False
         st.rerun()
