@@ -1,70 +1,30 @@
 import streamlit as st
 import requests
 
-# 1. Configuración de página (OBLIGATORIO AL PRINCIPIO)
-st.set_page_config(page_title="LizardPages Hub", page_icon="🦎", layout="wide")
+# 1. Configuración mínima
+st.set_page_config(page_title="LizardPages Hub")
 
-# 2. Seguridad de Acceso
-if "authenticated" not in st.session_state:
-    st.session_state["authenticated"] = False
+# 2. Entrada de datos del alumno
+st.title("🦎 LizardPages: Acceso Rápido")
+st.write("Configura tu acceso directo a WordPress")
 
-if not st.session_state["authenticated"]:
-    st.title("🦎 Acceso LizardPages")
-    clave = st.text_input("Introduce la clave maestra:", type="password")
-    if st.button("Entrar"):
-        if clave == "1234":
-            st.session_state["authenticated"] = True
-            st.rerun()
-        else:
-            st.error("Clave incorrecta")
-    st.stop()
+with st.form("config_sitio"):
+    url = st.text_input("URL de tu sitio:", placeholder="https://tusitio.com")
+    usuario = st.text_input("Tu Usuario admin:")
+    # Esta es la palabra clave que el alumno debe poner en su WordPress
+    clave_secreta = st.text_input("Tu Palabra Secreta (Token):", type="password")
+    
+    boton_guardar = st.form_submit_button("Guardar Configuración")
 
-# 3. Panel de Control (Solo se ve si estás logueado)
-st.title("🦎 LizardPages Command Center")
-st.write(f"Bienvenido de nuevo, Gerling.")
-
-# Lista de tus sitios (Aquí puedes agregar más siguiendo el formato)
-mis_sitios = [
-    {
-        "nombre": "LizardPages Principal", 
-        "url": "https://lizardpages.com", 
-        "user": "LP", 
-        "pass": "ZYk2 2z3H vSL2 A0D8 Hr3u ibG6"
-    },
-]
-
-st.subheader("Gestión de Mis Sitios")
-
-for sitio in mis_sitios:
-    with st.container():
-        # CORRECCIÓN: Ahora indicamos que queremos 3 columnas con anchos proporcionales
-        col1, col2, col3 = st.columns()
-        
-        with col1:
-            st.write(f"**{sitio['nombre']}**")
-            st.caption(sitio['url'])
-            
-        with col2:
-            if st.button(f"🔌 Verificar Salud", key=f"v_{sitio['nombre']}"):
-                try:
-                    res = requests.get(f"{sitio['url']}/wp-json/wp/v2/posts", 
-                                     auth=(sitio['user'], sitio['pass']), timeout=10)
-                    if res.status_code == 200:
-                        st.success("Online")
-                    else:
-                        st.warning(f"Error {res.status_code}")
-                except:
-                    st.error("No responde")
-                    
-        with col3:
-            # Enlace directo al Admin de WordPress
-            st.link_button("🚀 Abrir Admin", f"{sitio['url']}/wp-admin")
-        
-        st.divider()
-
-# Barra lateral
-with st.sidebar:
-    st.info("Panel v1.0 - Hosting Unlimited Pro")
-    if st.button("Cerrar Sesión"):
-        st.session_state["authenticated"] = False
-        st.rerun()
+if url and usuario and clave_secreta:
+    st.divider()
+    st.subheader(f"Panel para: {url}")
+    
+    # ENLACE MÁGICO: Este es el truco para el Login Automático
+    # Enviamos al alumno a su sitio con una "llave" especial
+    enlace_magico = f"{url.rstrip('/')}/?lizard_login={usuario}&key={clave_secreta}"
+    
+    st.write("Haz clic abajo para entrar sin contraseña:")
+    st.link_button("🚀 ENTRAR A MI WORDPRESS", enlace_magico)
+    
+    st.info("Nota: Para que el botón funcione, debes haber pegado el código Snippet en tu WordPress.")
